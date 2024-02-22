@@ -5,7 +5,7 @@
 // @match        https://calendar.google.com/calendar/u/*
 // @icon         https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg
 // @grant        none
-// @version      1.0
+// @version      1.1
 // @author       LeoDupont
 // @description  22/02/2024 16:42:29
 // ==/UserScript==
