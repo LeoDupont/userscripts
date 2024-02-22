@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Suno Notepad
 // @namespace    https://github.com/LeoDupont/userscripts
-// @version      0.1
+// @version      1.0
 // @description  Lets you annotate Suno tracks. Uses localStorage.
 // @author       LeoDupont
 // @match        https://app.suno.ai/*
@@ -27,19 +27,29 @@ var $ = window.$; // Declaration
 	'use strict';
 
 	mountNotepads();
+	onUrlChange(mountNotepads);
 
-	// === Listen to URL changes ===
-	var currentLocation = location.href;
+	showManualRefreshButton();
 
-	new MutationObserver(mutations => {
-		if (currentLocation !== location.href) {
-			currentLocation = location.href;
-			mountNotepads();
+	addGlobalStyles(`
+		.suno-notepad {
+			width: 30rem;
+			margin: 0 1rem;
+			background-color: #242a34;
+			color: white;
 		}
-	}).observe(document.body, {
-		childList: true,
-		subtree: false
-	});
+
+		.css-pjl8ph .suno-notepad {
+			display: block;
+			width: 100%;
+			margin: 0.1rem 0;
+		}
+
+		.css-lw6smx .suno-notepad {
+			display: block;
+			margin: 0.1rem 0;
+		}
+	`);
 
 })();
 
@@ -53,8 +63,9 @@ async function mountNotepads() {
 
 	var trackId = getTrackIdFromUrl(document.URL);
 	if (trackId) {
-		var trackNotes = loadNotes(trackId);
-		showNotepad(trackId, trackNotes, 'h2.chakra-heading');
+		loadNotepad(trackId, (notepad) => {
+			$('.css-lw6smx .css-1f0wxn3 p').prepend(notepad);
+		});
 	}
 
 	// === Create & Library Pages ===
@@ -63,12 +74,11 @@ async function mountNotepads() {
 	$(tracksElms).each(function (i, elm) {
 		var trackId = elm.attributes['data-clip-id'].value;
 		if (trackId) {
-			var trackNotes = loadNotes(trackId);
-			showNotepad(trackId, trackNotes, $(elm).find('.css-1fq6tx5'));
+			loadNotepad(trackId, (notepad) => {
+				$(elm).find('.css-1fq6tx5').append(notepad);
+			});
 		}
 	});
-
-	// === Library Page ===
 }
 
 function getTrackIdFromUrl(url) {
@@ -77,6 +87,21 @@ function getTrackIdFromUrl(url) {
 		return match[1];
 	}
 }
+
+function onUrlChange(callback) {
+	var currentLocation = location.href;
+
+	new MutationObserver(mutations => {
+		if (currentLocation !== location.href) {
+			currentLocation = location.href;
+			callback();
+		}
+	}).observe(document.body, {
+		childList: true,
+		subtree: false
+	});
+}
+
 
 function waitForElms(selector) {
 	return new Promise(resolve => {
@@ -102,28 +127,56 @@ function waitForElms(selector) {
 // == UI
 // =======================================================
 
-function showNotepad(trackId, value, elmToAppendTo) {
+function loadNotepad(trackId, callback) {
 	const inputId = 'suno-notepad-' + trackId;
 
 	if ($("#" + inputId).length != 0) {
 		return;
 	}
 
-	$('<input>')
+	const trackNotes = loadNotes(trackId);
+
+	const notepad = $('<input>')
 		.attr({
-			id: 'suno-notepad-' + trackId,
+			id: inputId,
+			class: 'suno-notepad',
 			name: 'suno-notepad',
-			style: 'width: 30rem; margin: 0 1rem; background-color: #242a34; color: white;',
-			value: value,
+			value: trackNotes,
 			placeholder: 'Notepad...',
 			autocomplete: 'off',
 		})
-		.appendTo(elmToAppendTo)
 		.keyup(function (e) {
 			var newNotes = e.target.value;
 			console.log('[SUNO NOTEPAD] Storing new notes for ' + trackId + ': ' + newNotes);
 			saveNotes(trackId, newNotes);
 		});
+
+	callback(notepad);
+}
+
+function showManualRefreshButton() {
+	$('<button>')
+		.attr({
+			id: 'suno-notepad-manual-refresh',
+			style: 'display: float; position: fixed; bottom: 1rem; right: 1rem;',
+			title: 'Notepad Refresh',
+			type: 'button',
+		})
+		.text('Notepad Refresh')
+		.appendTo(document.body)
+		.click(function (e) {
+			mountNotepads();
+		});
+}
+
+function addGlobalStyles(css) {
+	var head, style;
+	head = document.getElementsByTagName('head')[0];
+	if (!head) { return; }
+	style = document.createElement('style');
+	style.type = 'text/css';
+	style.innerHTML = css;
+	head.appendChild(style);
 }
 
 // =======================================================
