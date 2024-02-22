@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Suno Notepad
 // @namespace    https://github.com/LeoDupont/userscripts
-// @version      1.0
+// @version      1.1
 // @description  Lets you annotate Suno tracks. Uses localStorage.
 // @author       LeoDupont
 // @match        https://app.suno.ai/*
