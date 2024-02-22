@@ -3,6 +3,7 @@
 // @description  Redirects from user 0 to user X in Calendar
 // @namespace    https://github.com/LeoDupont/userscripts
 // @match        https://calendar.google.com/calendar/u/*
+// @icon         https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg
 // @grant        none
 // @version      1.0
 // @author       LeoDupont
