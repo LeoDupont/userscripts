@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Suno Notepad
 // @namespace    https://github.com/LeoDupont/userscripts
-// @version      1.1
+// @version      1.2
 // @description  Lets you annotate Suno tracks. Uses localStorage.
 // @author       LeoDupont
 // @match        https://app.suno.ai/*
@@ -23,8 +23,12 @@
 
 var $ = window.$; // Declaration
 
-(async function () {
+setTimeout(init, 500);
+
+async function init() {
 	'use strict';
+
+	console.log("==== Starting Suno Notepad ====")
 
 	mountNotepads();
 	onUrlChange(mountNotepads);
@@ -51,7 +55,7 @@ var $ = window.$; // Declaration
 		}
 	`);
 
-})();
+}
 
 // =======================================================
 // == Helpers
@@ -70,12 +74,12 @@ async function mountNotepads() {
 
 	// === Create & Library Pages ===
 
-	var tracksElms = await waitForElms('.css-i7zi74');
+	var tracksElms = await waitForElms('.css-ef2rl9');
 	$(tracksElms).each(function (i, elm) {
 		var trackId = elm.attributes['data-clip-id'].value;
 		if (trackId) {
 			loadNotepad(trackId, (notepad) => {
-				$(elm).find('.css-1fq6tx5').append(notepad);
+				$(elm).find('.css-89mcmc').append(notepad);
 			});
 		}
 	});
@@ -158,7 +162,7 @@ function showManualRefreshButton() {
 	$('<button>')
 		.attr({
 			id: 'suno-notepad-manual-refresh',
-			style: 'display: float; position: fixed; bottom: 1rem; right: 1rem;',
+			style: 'position: fixed; bottom: 1rem; right: 1rem; z-index: 9999',
 			title: 'Notepad Refresh',
 			type: 'button',
 		})
